@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 只为启动那一帧服务：去掉系统标题栏，并把窗口底色对齐 FlowVaultTheme 的浅色 bg。 -->
+    <style name="Theme.FlowVault" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#F7F8F9</item>
+    </style>
+</resources>

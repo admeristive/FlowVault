@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.cmd -text
+*.bat -text
+*.jar binary
+*.png binary
+*.webp binary

@@ -1,0 +1,8 @@
+*.iml
+.idea/
+.gradle/
+.kotlin/
+build/
+local.properties
+Python/
+adb-target.txt
