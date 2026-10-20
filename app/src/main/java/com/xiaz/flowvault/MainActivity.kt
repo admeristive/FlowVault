@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import com.xiaz.flowvault.core.debug.DebugLog
 import com.xiaz.flowvault.core.state.GlobalMode
 import com.xiaz.flowvault.core.state.ModeEngine
 import com.xiaz.flowvault.ui.components.ContentMaxWidth
+import com.xiaz.flowvault.ui.components.MascotStage
 import com.xiaz.flowvault.ui.components.ModeSwitcher
 import com.xiaz.flowvault.ui.components.WideBreakpoint
 import com.xiaz.flowvault.ui.components.WideContentMaxWidth
@@ -165,12 +167,20 @@ private fun AppShell(
                     .height(1.dp)
                     .background(hairline())
             )
-            Text(
-                text = mode.hint,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
-            )
+            // 看板娘和这一行说明绑在一起：她换姿势，这行字换话，两处一起报"现在在哪一态"。
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                MascotStage(mode)
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = mode.hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             Box(Modifier.weight(1f)) {
                 when (mode) {
                     GlobalMode.FOCUS -> FocusScreen(board, clock)
