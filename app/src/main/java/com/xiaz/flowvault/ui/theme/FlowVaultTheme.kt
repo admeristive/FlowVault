@@ -14,51 +14,91 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xiaz.flowvault.core.state.GlobalMode
 
-// 固定色板，不跟手机壁纸走：三态靠版式和描边区分，不靠大面积彩色。
-// 面色分五级容器（越靠上越"凹"），卡片浮在页底上、嵌套块再往回沉一档。
-private val LightScheme = lightColorScheme(
-    primary = Color(0xFF2A4C7D),
+/**
+ * 三态各带一个色温：攻坚番茄、回血叶绿、日常天青。切过去整屏换一个颜色，
+ * 不用读标题就知道自己在哪一态。彩度只给强调那一层，底始终是奶白／墨底。
+ */
+enum class ModeTint { BERRY, LEAF, SKY }
+
+internal fun GlobalMode.tint(): ModeTint = when (this) {
+    GlobalMode.FOCUS -> ModeTint.BERRY
+    GlobalMode.BREAK -> ModeTint.LEAF
+    GlobalMode.DAILY -> ModeTint.SKY
+}
+
+// 明档三个主色都压在 4.7:1 以上：primary 在分段控件和按钮里是当文字用的，
+// 落在染色底上一旦低于 4.5 就成了看不清的小字。暗档反过来要提亮，不能沿用。
+private fun lightAccent(tint: ModeTint): Color = when (tint) {
+    ModeTint.BERRY -> Color(0xFFA6423A)
+    ModeTint.LEAF -> Color(0xFF35704A)
+    ModeTint.SKY -> Color(0xFF35699A)
+}
+
+private fun darkAccent(tint: ModeTint): Color = when (tint) {
+    ModeTint.BERRY -> Color(0xFFF0A79C)
+    ModeTint.LEAF -> Color(0xFF9BD1A8)
+    ModeTint.SKY -> Color(0xFF9CC6EA)
+}
+
+private fun darkOnAccent(tint: ModeTint): Color = when (tint) {
+    ModeTint.BERRY -> Color(0xFF3A1310)
+    ModeTint.LEAF -> Color(0xFF0E2413)
+    ModeTint.SKY -> Color(0xFF10293C)
+}
+
+// 面色分五级容器（越靠上越"凹"）。这一套往暖里偏：奶白底配暖墨字，
+// 冷灰底上放彩色只会显得脏。
+private val LightBase = lightColorScheme(
+    primary = Color(0xFFA6423A),
     onPrimary = Color(0xFFFFFFFF),
-    secondary = Color(0xFF465464),
+    secondary = Color(0xFF7A5F63),
     onSecondary = Color(0xFFFFFFFF),
-    background = Color(0xFFF7F8F9),
-    onBackground = Color(0xFF14171A),
+    background = Color(0xFFFBF6F3),
+    onBackground = Color(0xFF3B2F33),
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF14171A),
-    surfaceVariant = Color(0xFFEFF2F5),
-    onSurfaceVariant = Color(0xFF5B636B),
-    outline = Color(0xFFD6DBE0),
-    outlineVariant = Color(0xFFE7EBEF),
+    onSurface = Color(0xFF3B2F33),
+    surfaceVariant = Color(0xFFF7EDE9),
+    onSurfaceVariant = Color(0xFF6E5F63),
+    outline = Color(0xFFE6D8D3),
+    outlineVariant = Color(0xFFF0E5E1),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFFAFBFC),
-    surfaceContainer = Color(0xFFF3F5F7),
-    surfaceContainerHigh = Color(0xFFEAEEF1),
-    surfaceContainerHighest = Color(0xFFE1E5E9),
-    surfaceDim = Color(0xFFE4E8EC),
+    surfaceContainerLow = Color(0xFFFDF9F7),
+    surfaceContainer = Color(0xFFF8F1EE),
+    surfaceContainerHigh = Color(0xFFF2E7E3),
+    surfaceContainerHighest = Color(0xFFEBDDD8),
+    surfaceDim = Color(0xFFE8DCD8),
     surfaceBright = Color(0xFFFFFFFF),
 )
 
-private val DarkScheme = darkColorScheme(
-    primary = Color(0xFF83ABD8),
-    onPrimary = Color(0xFF0F1620),
-    secondary = Color(0xFFA7B2BE),
-    onSecondary = Color(0xFF12161A),
-    background = Color(0xFF101315),
-    onBackground = Color(0xFFE4E7E9),
-    surface = Color(0xFF161A1D),
-    onSurface = Color(0xFFE4E7E9),
-    surfaceVariant = Color(0xFF1D2227),
-    onSurfaceVariant = Color(0xFF9BA4AD),
-    outline = Color(0xFF313840),
-    outlineVariant = Color(0xFF232A31),
-    surfaceContainerLowest = Color(0xFF0C0E10),
-    surfaceContainerLow = Color(0xFF14171A),
-    surfaceContainer = Color(0xFF181C20),
-    surfaceContainerHigh = Color(0xFF1D2226),
-    surfaceContainerHighest = Color(0xFF22272C),
-    surfaceDim = Color(0xFF0F1214),
-    surfaceBright = Color(0xFF1F252A),
+private val DarkBase = darkColorScheme(
+    primary = Color(0xFFF0A79C),
+    onPrimary = Color(0xFF3A1310),
+    secondary = Color(0xFFC7AEB3),
+    onSecondary = Color(0xFF3A2C30),
+    background = Color(0xFF191519),
+    onBackground = Color(0xFFEDE4E7),
+    surface = Color(0xFF211C22),
+    onSurface = Color(0xFFEDE4E7),
+    surfaceVariant = Color(0xFF2B2429),
+    onSurfaceVariant = Color(0xFFB9A9AE),
+    outline = Color(0xFF4A3F45),
+    outlineVariant = Color(0xFF352D33),
+    surfaceContainerLowest = Color(0xFF141014),
+    surfaceContainerLow = Color(0xFF1D181E),
+    surfaceContainer = Color(0xFF221C23),
+    surfaceContainerHigh = Color(0xFF29222A),
+    surfaceContainerHighest = Color(0xFF312930),
+    surfaceDim = Color(0xFF120F13),
+    surfaceBright = Color(0xFF2E272F),
+)
+
+private fun lightScheme(tint: ModeTint): ColorScheme = LightBase.copy(primary = lightAccent(tint))
+
+private fun darkScheme(tint: ModeTint): ColorScheme = DarkBase.copy(
+    primary = darkAccent(tint),
+    onPrimary = darkOnAccent(tint),
 )
 
 /**
@@ -99,20 +139,19 @@ private val FlowVaultTypography = Typography(
     labelSmall = type(12, 14, FontWeight.Normal, 0.2),
 )
 
-// 五档圆角实际只有三个在用（small 7 处、medium 2 处、extraSmall 1 处）。
-// 原来 5/7/9 挨得太近，看着像随机数；收成 4-6-8-10 的等差，大圆角那两档跟它们并掉。
+// 赛璐璐的形是圆胖的：原来 4-6-8-10 那档是工控台的收法，整层放到 6-10-14-18。
 private val FlowVaultShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(6.dp),
-    medium = RoundedCornerShape(8.dp),
-    large = RoundedCornerShape(10.dp),
-    extraLarge = RoundedCornerShape(10.dp),
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(14.dp),
+    large = RoundedCornerShape(18.dp),
+    extraLarge = RoundedCornerShape(22.dp),
 )
 
 @Composable
-internal fun FlowVaultTheme(dark: Boolean, content: @Composable () -> Unit) {
+internal fun FlowVaultTheme(dark: Boolean, tint: ModeTint, content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (dark) DarkScheme else LightScheme,
+        colorScheme = if (dark) darkScheme(tint) else lightScheme(tint),
         typography = FlowVaultTypography,
         shapes = FlowVaultShapes,
         content = content,
@@ -134,17 +173,18 @@ internal fun hairline(): Color {
  * 语义色只留给"状态"：完成了、没过、日志里的警告。别处一律不上——
  * 屏幕上只要同时出现三四种颜色，读的人就得分心去找哪个是重点。
  * 明暗各一套，都是压过饱和度的：暗底上的鲜绿会亮成指示灯。
+ * 完成态特意走青绿而不是叶绿，否则在回血态里它跟主色撞成同一个颜色，分不清是状态还是装饰。
  */
 internal data class StateColors(val good: Color, val warn: Color, val bad: Color)
 
 private val LightState = StateColors(
-    good = Color(0xFF2F6B4C),
+    good = Color(0xFF1F6B63),
     warn = Color(0xFF8A5A2B),
     bad = Color(0xFF8C3B3B),
 )
 
 private val DarkState = StateColors(
-    good = Color(0xFF74B18C),
+    good = Color(0xFF7FC3BB),
     warn = Color(0xFFC89B5C),
     bad = Color(0xFFD18B8B),
 )

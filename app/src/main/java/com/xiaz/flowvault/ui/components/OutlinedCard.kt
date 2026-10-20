@@ -2,6 +2,7 @@ package com.xiaz.flowvault.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,10 +39,19 @@ internal val WideContentMaxWidth = 1080.dp
 internal enum class CardRole { HERO, PLAIN }
 
 /**
- * 描边卡片：靠 1dp 边框分层，不用阴影。
+ * 同色铺底的厚度。强调不靠另换一块彩底，靠把这一态的主色在底上压一层薄纱——
+ * 8% 是量出来的：再浅看不出跟邻块的区别，到 12% 时铺满一屏就成了一片色纸。
+ */
+private const val TINT_FILL = 0.08f
+
+/** 主角卡那圈描边的浓度：比发丝线实，但离纯色还有一档，免得整屏只有一个重点在喊。 */
+private const val HERO_EDGE = 0.45f
+
+/**
+ * 赛璐璐卡片：一块底、一圈实心描边、标题前一根实色竖条，不靠阴影。
  *
- * 普通段不落底、不围边，只在头顶压一条发丝线——一屏里只让主角那一张有盒子，
- * 层级靠"有边／无边"这一下分出来，不靠把某张卡涂成彩色（色板里的语义色只留给状态）。
+ * 普通段不落底、不围边，只在头顶压一条发丝线加同一根竖条——一屏里只让主角那一张有盒子，
+ * 层级靠"有底／无底"分，强调靠"同色薄纱"分，都不靠把某张卡涂成语义色（那几个色只留给状态）。
  */
 @Composable
 internal fun OutlinedCard(
@@ -51,15 +61,18 @@ internal fun OutlinedCard(
     content: @Composable () -> Unit,
 ) {
     val hero = role == CardRole.HERO
+    val accent = MaterialTheme.colorScheme.primary
+    val shape = MaterialTheme.shapes.medium
     Column(
         modifier = modifier
             .fillMaxWidth()
             .then(
                 if (hero) {
                     Modifier
-                        .clip(MaterialTheme.shapes.medium)
+                        .clip(shape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, hairline(), MaterialTheme.shapes.medium)
+                        .background(accent.copy(alpha = TINT_FILL))
+                        .border(1.5.dp, accent.copy(alpha = HERO_EDGE), shape)
                 } else {
                     Modifier
                 },
@@ -70,11 +83,21 @@ internal fun OutlinedCard(
             Spacer(Modifier.fillMaxWidth().height(1.dp).background(hairline()))
             Spacer(Modifier.height(11.dp))
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // 竖条粗细给到 3dp：2dp 在 2.75 倍屏上跟一根描边分不出来，起不到"标记"的作用。
+            Box(
+                Modifier
+                    .width(3.dp)
+                    .height(if (hero) 14.dp else 12.dp)
+                    .background(accent)
+            )
+            Spacer(Modifier.width(7.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = if (hero) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         content()
     }
 }

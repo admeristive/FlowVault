@@ -57,28 +57,39 @@ import com.xiaz.flowvault.ui.state.PomodoroClock
 import kotlinx.coroutines.delay
 import com.xiaz.flowvault.ui.theme.FlowVaultTheme
 import com.xiaz.flowvault.ui.theme.hairline
+import com.xiaz.flowvault.ui.theme.tint
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlowVaultTheme(dark = isSystemInDarkTheme()) {
-                AppRoot()
-            }
+            AppRoot()
         }
     }
 }
 
+/**
+ * 色板跟着当前态走：攻坚一套、回血一套、日常一套，换态时整屏一起换。
+ * 所以 Theme 必须包在内容外面，而它又要知道 mode——只能在这一层把 mode 先取出来。
+ */
 @Composable
-private fun AppRoot(
-    engine: ModeEngine = viewModel(),
+private fun AppRoot(engine: ModeEngine = viewModel()) {
+    val mode by engine.mode.collectAsStateWithLifecycle()
+    FlowVaultTheme(dark = isSystemInDarkTheme(), tint = mode.tint()) {
+        AppShell(mode, engine)
+    }
+}
+
+@Composable
+private fun AppShell(
+    mode: GlobalMode,
+    engine: ModeEngine,
     board: DayBoard = viewModel(),
     clock: PomodoroClock = viewModel(),
     shelf: NovelShelf = viewModel(),
     decks: DeckShelf = viewModel(),
     backup: BackupKit = viewModel(),
 ) {
-    val mode by engine.mode.collectAsStateWithLifecycle()
     val handoff by clock.handoff.collectAsStateWithLifecycle()
     val app = LocalContext.current.applicationContext as FlowVaultApp
     val databaseStatus by app.databaseStatus.collectAsStateWithLifecycle()
