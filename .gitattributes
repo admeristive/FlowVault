@@ -2,5 +2,6 @@
 *.cmd -text
 *.bat -text
 *.jar binary
+*.ttf binary
 *.png binary
 *.webp binary

@@ -11,9 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xiaz.flowvault.R
 import com.xiaz.flowvault.core.state.GlobalMode
 
 /**
@@ -106,14 +109,31 @@ private fun darkScheme(tint: ModeTint): ColorScheme = DarkBase.copy(
  * 中文上行距偏紧、字重全平，屏幕上就是一片齐刷刷的灰——之前整个界面 60 处文字全在它的档位上。
  * 只碰字号、行距、字重、字距这四件，配色一律留给色板。
  */
-private fun type(size: Int, line: Int, weight: FontWeight, track: Double): TextStyle = TextStyle(
+private fun type(
+    size: Int,
+    line: Int,
+    weight: FontWeight,
+    track: Double,
+    family: FontFamily = FontFamily.Default,
+): TextStyle = TextStyle(
     fontSize = size.sp,
     lineHeight = line.sp,
     fontWeight = weight,
+    fontFamily = family,
     // 表格数字：倒计时和金额列跳一秒/一分不左右挪。系统字体不认时只是不齐，不会报错。
     fontFeatureSettings = "tnum",
     letterSpacing = track.sp,
 )
+
+/**
+ * 站酷快乐体，圆胖的手写感，只用在标题这三档。
+ *
+ * 读数（计时器、金额、分钟数）一律不碰它：那几档要的是等宽数字跳秒不挪，这支字体没有 tnum，
+ * 而且它自己的 0 就比系统字体宽，24sp 的倒计时会左右抖。正文、用户写进去的任何字也不碰。
+ * 字重给 Normal：这支字体出厂只有一只字重，要 SemiBold 就得让框架合成假粗，
+ * 圆体一假粗就把笔画糊在一起——标题的层级改用"换字体＋加大＋竖条"来表达。
+ */
+private val DisplayFamily = FontFamily(Font(R.font.zcool_kuaile, FontWeight.Normal))
 
 private val FlowVaultTypography = Typography(
     // 大字读数：专注计时器。负字距只给这种大数字，中文标题压负值会挤成一块。
@@ -123,10 +143,10 @@ private val FlowVaultTypography = Typography(
     headlineLarge = type(20, 26, FontWeight.SemiBold, 0.0),
     headlineMedium = type(20, 26, FontWeight.SemiBold, 0.0),
     headlineSmall = type(24, 28, FontWeight.SemiBold, -0.3),
-    titleLarge = type(16, 22, FontWeight.SemiBold, 0.0),
-    titleMedium = type(14, 20, FontWeight.Medium, 0.0),
+    titleLarge = type(16, 22, FontWeight.Normal, 0.0, DisplayFamily),
+    titleMedium = type(14, 20, FontWeight.Normal, 0.0, DisplayFamily),
     // 卡片标题
-    titleSmall = type(14, 20, FontWeight.SemiBold, 0.0),
+    titleSmall = type(14, 20, FontWeight.Normal, 0.0, DisplayFamily),
     // 正文：待办标题、备注、闪念。"朴素"的一半来自行距太紧，这里给到 1.57 倍。
     bodyLarge = type(14, 22, FontWeight.Normal, 0.1),
     bodyMedium = type(14, 22, FontWeight.Normal, 0.1),
