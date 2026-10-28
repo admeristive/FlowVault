@@ -25,7 +25,8 @@ import com.xiaz.flowvault.ui.components.ActionLabel
 import com.xiaz.flowvault.ui.components.CaptureBar
 import com.xiaz.flowvault.ui.components.CardFlow
 import com.xiaz.flowvault.ui.components.CardRole
-import com.xiaz.flowvault.ui.components.EmptyLine
+import com.xiaz.flowvault.ui.components.EmptyGlyph
+import com.xiaz.flowvault.ui.components.EmptyNote
 import com.xiaz.flowvault.ui.components.OutlinedCard
 import com.xiaz.flowvault.ui.components.TodoRow
 import com.xiaz.flowvault.ui.state.DayBoard
@@ -56,7 +57,10 @@ internal fun FocusScreen(
                     OutlinedCard("这段时间要做的事") {
                         Spacer(Modifier.height(8.dp))
                         if (data.todos.isEmpty()) {
-                            EmptyLine("还没有排进来的事，用下面的输入条丢一条")
+                            EmptyNote(
+                                EmptyGlyph.TODO,
+                                "还没有排进来的事，用下面的输入条丢一条",
+                            )
                         } else {
                             data.todos.forEach { todo ->
                                 TodoRow(todo) {
@@ -108,9 +112,9 @@ private fun TimerBlock(clock: PomodoroClock, focusSec: Int, todos: List<Todo>) {
         // 这里只要认得出是哪一条。一条都不选就记成"没绑"，那趟照样走，只是不摊给任何事。
         if (open.isNotEmpty()) {
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                ActionLabel("不绑", selected = bound == null) { clock.bind(null) }
+                ActionLabel("不绑", option = true, selected = bound == null) { clock.bind(null) }
                 open.forEach { todo ->
-                    ActionLabel(todo.title.take(12), selected = bound == todo.id) { clock.bind(todo.id) }
+                    ActionLabel(todo.title.take(12), option = true, selected = bound == todo.id) { clock.bind(todo.id) }
                 }
             }
             Spacer(Modifier.height(4.dp))
@@ -164,7 +168,6 @@ private fun TimerBlock(clock: PomodoroClock, focusSec: Int, todos: List<Todo>) {
         } else {
             ActionLabel("接着走") { clock.resume() }
         }
-        Spacer(Modifier.width(8.dp))
         ActionLabel("结束这趟") { clock.stop() }
     }
 }

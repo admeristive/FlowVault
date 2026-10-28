@@ -36,7 +36,8 @@ import com.xiaz.flowvault.ui.components.ActionLabel
 import com.xiaz.flowvault.ui.components.CaptureBar
 import com.xiaz.flowvault.ui.components.CardFlow
 import com.xiaz.flowvault.ui.components.CardRole
-import com.xiaz.flowvault.ui.components.EmptyLine
+import com.xiaz.flowvault.ui.components.EmptyGlyph
+import com.xiaz.flowvault.ui.components.EmptyNote
 import com.xiaz.flowvault.ui.components.OutlinedCard
 import com.xiaz.flowvault.ui.components.ReaderPage
 import com.xiaz.flowvault.ui.components.ReaderProgress
@@ -151,7 +152,10 @@ private fun ShelfView(
                             )
                         }
                         if (state.novels.isEmpty()) {
-                            EmptyLine("书架是空的。TXT 从手机本地选，应用不申请存储权限，也不往手机其他角落写东西")
+                            EmptyNote(
+                                EmptyGlyph.NOVEL,
+                                "书架是空的。TXT 从手机本地选，应用不申请存储权限，也不往手机其他角落写东西",
+                            )
                         } else {
                             state.novels.forEach { novel ->
                                 NovelRow(
@@ -201,7 +205,10 @@ private fun ShelfView(
                         )
                         Spacer(Modifier.height(4.dp))
                         if (deckState.decks.isEmpty()) {
-                            EmptyLine("还没有卡组。CSV 每行是「正面,背面」，JSON 要对象数组；没有到期卡时不拦你")
+                            EmptyNote(
+                                EmptyGlyph.DECK,
+                                "还没有卡组。CSV 每行是「正面,背面」，JSON 要对象数组；没有到期卡时不拦你",
+                            )
                         } else {
                             deckState.decks.forEach { deck ->
                                 DeckRow(deck = deck, onRemove = { decks.remove(deck) })
@@ -291,10 +298,10 @@ private fun ReadingView(
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp)) {
             ActionLabel("回书架") { shelf.leaveReader() }
             ActionLabel("加书签") { shelf.addMark() }
-            ActionLabel(if (marksOpen) "收起书签" else "书签 ${state.marks.size}") { marksOpen = !marksOpen }
+            ActionLabel(if (marksOpen) "收起书签" else "书签 ${state.marks.size}", option = true) { marksOpen = !marksOpen }
             Spacer(Modifier.weight(1f))
-            ActionLabel(state.style.surface.label) { shelf.surface() }
-            ActionLabel(if (state.style.paginated) "翻页" else "滚动") {
+            ActionLabel(state.style.surface.label, option = true) { shelf.surface() }
+            ActionLabel(if (state.style.paginated) "翻页" else "滚动", option = true) {
                 shelf.paging(!state.style.paginated)
             }
         }
@@ -373,7 +380,7 @@ private fun MarkList(state: ShelfState, onJump: (Int) -> Unit, onDrop: (Long) ->
             .padding(horizontal = 12.dp),
     ) {
         if (state.marks.isEmpty()) {
-            EmptyLine("还没有书签")
+            EmptyNote(EmptyGlyph.MARK, "还没有书签")
         } else {
             state.marks.forEach { mark ->
                 Row(verticalAlignment = Alignment.CenterVertically) {

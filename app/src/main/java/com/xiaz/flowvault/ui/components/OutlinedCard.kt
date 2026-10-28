@@ -84,12 +84,14 @@ internal fun OutlinedCard(
             Spacer(Modifier.height(11.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // 竖条粗细给到 3dp：2dp 在 2.75 倍屏上跟一根描边分不出来，起不到"标记"的作用。
+            // 竖条只在主角卡上染主色：普通段也来一根的话，一屏就是七八根同色旗，
+            // 主色立刻不值钱，这一态的颜色也就喊不出来了。普通段退回中性色，
+            // 只当"这里起一段"的记号。粗细仍给 3dp：2dp 在 2.75 倍屏上跟描边分不出来。
             Box(
                 Modifier
                     .width(3.dp)
                     .height(if (hero) 14.dp else 12.dp)
-                    .background(accent)
+                    .background(if (hero) accent else MaterialTheme.colorScheme.onSurfaceVariant)
             )
             Spacer(Modifier.width(7.dp))
             Text(

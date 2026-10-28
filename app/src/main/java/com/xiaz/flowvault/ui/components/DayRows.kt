@@ -204,17 +204,6 @@ internal fun captureNote(capture: Capture?): String? {
     return "《$name》第 $offset 字"
 }
 
-/** 空列表也要有话说，但不能是假数据。 */
-@Composable
-internal fun EmptyLine(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.fillMaxWidth().padding(vertical = RowGap),
-    )
-}
-
 private fun moduleWord(module: String): String = when (module) {
     "todo" -> "待办"
     "ledger" -> "记账"

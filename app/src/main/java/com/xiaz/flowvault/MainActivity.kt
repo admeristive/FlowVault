@@ -151,12 +151,14 @@ private fun AppShell(
                 Text(
                     text = "流转秘境",
                     style = MaterialTheme.typography.titleMedium,
+                    // pointerInput 写在 padding 之前：命中区包含这上下 12dp，长按开日志的热区
+                    // 从字高 20dp 垫到 44dp。这一下平时看不见，只有按不准的时候才想念它。
                     modifier = Modifier.pointerInput(Unit) {
                         detectTapGestures(onLongPress = {
                             panelOpen = !panelOpen
                             DebugLog.info("ui", if (panelOpen) "打开日志浮窗" else "收起日志浮窗")
                         })
-                    },
+                    }.padding(vertical = 12.dp),
                 )
                 Spacer(Modifier.weight(1f))
                 ModeSwitcher(current = mode, onSelect = engine::enter)

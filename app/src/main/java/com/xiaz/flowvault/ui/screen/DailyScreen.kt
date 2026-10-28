@@ -27,7 +27,8 @@ import com.xiaz.flowvault.ui.components.ActionLabel
 import com.xiaz.flowvault.ui.components.CaptureBar
 import com.xiaz.flowvault.ui.components.CardFlow
 import com.xiaz.flowvault.ui.components.CardRole
-import com.xiaz.flowvault.ui.components.EmptyLine
+import com.xiaz.flowvault.ui.components.EmptyGlyph
+import com.xiaz.flowvault.ui.components.EmptyNote
 import com.xiaz.flowvault.ui.components.LedgerRow
 import com.xiaz.flowvault.ui.components.OutlinedCard
 import com.xiaz.flowvault.ui.components.TimelineRow
@@ -74,7 +75,7 @@ internal fun DailyScreen(
                     OutlinedCard("今天的时间") {
                         Spacer(Modifier.height(8.dp))
                         if (data.todos.isEmpty()) {
-                            EmptyLine("还没有排进来的事")
+                            EmptyNote(EmptyGlyph.TODO, "还没有排进来的事")
                         } else {
                             data.todos.forEach { todo ->
                                 TodoRow(todo) {
@@ -107,7 +108,7 @@ internal fun DailyScreen(
                         }
                         Spacer(Modifier.height(8.dp))
                         if (data.txs.isEmpty()) {
-                            EmptyLine("今天还没有记过钱")
+                            EmptyNote(EmptyGlyph.LEDGER, "今天还没有记过钱")
                         } else {
                             data.txs.forEach { LedgerRow(it) }
                         }
@@ -159,7 +160,7 @@ internal fun DailyScreen(
                     OutlinedCard("今天的轨迹") {
                         Spacer(Modifier.height(8.dp))
                         if (data.events.isEmpty()) {
-                            EmptyLine("今天还没有留下动作")
+                            EmptyNote(EmptyGlyph.TRACE, "今天还没有留下动作")
                         } else {
                             data.events.forEach { TimelineRow(it, note = captureNote(data.captureFor(it))) }
                         }

@@ -53,7 +53,9 @@ internal fun ModeSwitcher(
                     .background(cellFill(selected))
                     .background(pressedFill(source))
                     .clickable(interactionSource = source, indication = null) { onSelect(mode) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    // 纵向 14：字高 16 + 上下 28 = 44dp 的一格。原来 8 只有 32dp，
+                    // 三格挤在右上角，切换这一态是全场点得最多的一下，准头最差。
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             )
             if (index < modes.lastIndex) {
                 Spacer(
