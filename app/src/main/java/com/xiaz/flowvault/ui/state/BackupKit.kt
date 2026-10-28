@@ -101,6 +101,14 @@ internal class BackupKit(app: Application) : AndroidViewModel(app) {
     }
 
     /**
+     * 按钮那一层先挡一下：正在走一趟就别把文件选择器拉起来，否则他挑完文件才看到那句拒绝，白挑一次。
+     * [stage] 里那道判断留着——选择器开着的那几秒里他还能切去攻坚起一趟，那是另一条时间线。
+     */
+    fun refuseTiming() {
+        _state.value = _state.value.copy(plan = null, note = TIMING_REFUSED)
+    }
+
+    /**
      * 第一步：读回来、验一遍。验过了才把两组数亮出来，等第二下。
      *
      * [timingActive] 由界面当场报"现在有没有一趟在走"。恢复会把 `pomodoro_sessions` 整张洗掉，

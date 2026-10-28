@@ -238,7 +238,10 @@ private fun BackupCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ActionLabel("导出一份") { exporter.launch(kit.suggestedName()) }
                 ActionLabel("选一份来恢复") {
-                    restorer.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+                    if (timingActive()) kit.refuseTiming()
+                    else restorer.launch(
+                        arrayOf("application/json", "text/plain", "application/octet-stream"),
+                    )
                 }
             }
         } else {
