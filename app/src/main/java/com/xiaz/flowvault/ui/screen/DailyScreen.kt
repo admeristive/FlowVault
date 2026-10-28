@@ -35,6 +35,7 @@ import com.xiaz.flowvault.ui.components.TimelineRow
 import com.xiaz.flowvault.ui.components.captureNote
 import com.xiaz.flowvault.ui.components.TollPanel
 import com.xiaz.flowvault.ui.components.TodoRow
+import com.xiaz.flowvault.ui.components.headCount
 import com.xiaz.flowvault.ui.state.BackupKit
 import com.xiaz.flowvault.ui.state.BackupState
 import com.xiaz.flowvault.ui.state.DayBoard
@@ -72,7 +73,7 @@ internal fun DailyScreen(
         CardFlow(
             cards = listOf(
                 {
-                    OutlinedCard("今天的时间") {
+                    OutlinedCard("今天的时间" + headCount(data.todos.size, "条")) {
                         Spacer(Modifier.height(8.dp))
                         if (data.todos.isEmpty()) {
                             EmptyNote(EmptyGlyph.TODO, "还没有排进来的事")
@@ -97,7 +98,10 @@ internal fun DailyScreen(
                     }
                 },
                 {
-                    OutlinedCard("记账", role = CardRole.HERO) {
+                    OutlinedCard(
+                        title = "记账" + headCount(data.txs.size, "笔"),
+                        role = CardRole.HERO,
+                    ) {
                         Spacer(Modifier.height(8.dp))
                         CaptureBar(placeholder = "-15 午饭 · +500 工资") { raw, then -> board.submit(raw, then) }
                         Spacer(Modifier.height(12.dp))
@@ -157,7 +161,7 @@ internal fun DailyScreen(
                     }
                 },
                 {
-                    OutlinedCard("今天的轨迹") {
+                    OutlinedCard("今天的轨迹" + headCount(data.events.size, "条")) {
                         Spacer(Modifier.height(8.dp))
                         if (data.events.isEmpty()) {
                             EmptyNote(EmptyGlyph.TRACE, "今天还没有留下动作")

@@ -143,6 +143,13 @@ private fun ColumnScope.Stacked(cards: List<@Composable () -> Unit>, gap: Dp) {
     }
 }
 
+/**
+ * 分组头后面缀的真实计数。空的时候不写"0 条"：那串零看着像闸坏了，
+ * 而同一张卡里的空态那句话已经把"这里还没有东西"说过了。
+ */
+internal fun headCount(count: Int, word: String): String =
+    if (count <= 0) "" else " · $count $word"
+
 /** 尚未接入的能力一律写清在第几阶段落地，界面里不留假数据。 */
 @Composable
 internal fun PendingNote(text: String) {

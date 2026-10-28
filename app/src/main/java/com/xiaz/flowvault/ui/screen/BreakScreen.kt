@@ -44,6 +44,7 @@ import com.xiaz.flowvault.ui.components.ReaderProgress
 import com.xiaz.flowvault.ui.components.ReaderScroll
 import com.xiaz.flowvault.ui.components.TollPanel
 import com.xiaz.flowvault.ui.components.readerColorsOf
+import com.xiaz.flowvault.ui.components.headCount
 import com.xiaz.flowvault.ui.state.DayBoard
 import com.xiaz.flowvault.ui.state.DeckShelf
 import com.xiaz.flowvault.ui.state.DeckState
@@ -130,7 +131,7 @@ private fun ShelfView(
                     }
                 },
                 {
-                    OutlinedCard("本地小说") {
+                    OutlinedCard("本地小说" + headCount(state.novels.size, "本")) {
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             ActionLabel("选一本 TXT") { picker.launch(arrayOf("text/*", "application/octet-stream")) }
@@ -169,7 +170,7 @@ private fun ShelfView(
                     }
                 },
                 {
-                    OutlinedCard("闪卡卡组") {
+                    OutlinedCard("闪卡卡组" + headCount(deckState.decks.size, "组")) {
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             ActionLabel("导一份 CSV/JSON") {

@@ -29,6 +29,7 @@ import com.xiaz.flowvault.ui.components.EmptyGlyph
 import com.xiaz.flowvault.ui.components.EmptyNote
 import com.xiaz.flowvault.ui.components.OutlinedCard
 import com.xiaz.flowvault.ui.components.TodoRow
+import com.xiaz.flowvault.ui.components.headCount
 import com.xiaz.flowvault.ui.state.DayBoard
 import com.xiaz.flowvault.ui.state.PomodoroClock
 
@@ -54,7 +55,7 @@ internal fun FocusScreen(
                     }
                 },
                 {
-                    OutlinedCard("这段时间要做的事") {
+                    OutlinedCard("这段时间要做的事" + headCount(data.todos.size, "条")) {
                         Spacer(Modifier.height(8.dp))
                         if (data.todos.isEmpty()) {
                             EmptyNote(

@@ -31,8 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -69,6 +72,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+/**
+ * 标题那一圈描边的厚度。站酷快乐体本身就粗，到 1.6dp 时字里那点留白开始被吃掉；
+ * 再薄到 1dp 以下，在 420dpi 上不到三个像素，跟没有是一样的。
+ */
+private val TitleEdge = 1.2.dp
 
 /**
  * 色板跟着当前态走：攻坚一套、回血一套、日常一套，换态时整屏一起换。
@@ -148,18 +157,34 @@ private fun AppShell(
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "流转秘境",
-                    style = MaterialTheme.typography.titleMedium,
-                    // pointerInput 写在 padding 之前：命中区包含这上下 12dp，长按开日志的热区
-                    // 从字高 20dp 垫到 44dp。这一下平时看不见，只有按不准的时候才想念它。
+                // 贴纸感：同一句字画两遍，后面那遍只描边、涂这一态的主色，前面那遍实心。
+                // 一层 TextStyle 做不到"又实又有边"——drawStyle 是把填充换成描边，不是加一圈，
+                // 所以只能叠两层。全项目只给标题这一颗，再多一处就成了满屏特效。
+                // pointerInput 写在 padding 之前：命中区包含这上下 12dp，长按开日志的热区
+                // 从字高 20dp 垫到 44dp。这一下平时看不见，只有按不准的时候才想念它。
+                Box(
                     modifier = Modifier.pointerInput(Unit) {
                         detectTapGestures(onLongPress = {
                             panelOpen = !panelOpen
                             DebugLog.info("ui", if (panelOpen) "打开日志浮窗" else "收起日志浮窗")
                         })
                     }.padding(vertical = 12.dp),
-                )
+                ) {
+                    Text(
+                        text = "流转秘境",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            drawStyle = Stroke(width = with(LocalDensity.current) { TitleEdge.toPx() }),
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        // 后面这层只是给眼睛看的描边，读屏软件念一遍就够了。
+                        modifier = Modifier.clearAndSetSemantics { },
+                    )
+                    Text(
+                        text = "流转秘境",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
                 Spacer(Modifier.weight(1f))
                 ModeSwitcher(current = mode, onSelect = engine::enter)
             }
