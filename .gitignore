@@ -6,3 +6,4 @@ build/
 local.properties
 Python/
 adb-target.txt
+fv-local.cmd

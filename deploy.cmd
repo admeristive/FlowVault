@@ -11,14 +11,18 @@ rem separate "USB install" switch - Honor/MagicOS blocks adb install without it,
 rem that shows up as install=FAIL while device=READY.
 rem
 rem Wireless path (no USB driver needed):
-rem   1) run yourself in any terminal:  D:\tools\android-sdk\platform-tools\adb.exe pair <addr:port> <code>
+rem   1) run yourself in any terminal:  adb pair <addr:port> <code>   (platform-tools\adb.exe)
 rem   2) put ONLY that addr:port on the first line of  adb-target.txt  (this folder, gitignored)
 rem   3) run this script. Delete adb-target.txt to go back to plain USB.
 rem
 rem Every exit path goes through :end, which pauses so a double-clicked window stays
 rem readable. Agent and terminal runs set FV_SCRIPTED=1 to skip the pause.
 
-set "ADB=D:\tools\android-sdk\platform-tools\adb.exe"
+rem Toolchain: fv-local.cmd (gitignored) may set ANDROID_HOME first.
+if exist "%~dp0fv-local.cmd" call "%~dp0fv-local.cmd"
+if not defined ANDROID_HOME if defined ANDROID_SDK_ROOT set "ANDROID_HOME=%ANDROID_SDK_ROOT%"
+if not defined ANDROID_HOME set "ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk"
+set "ADB=%ANDROID_HOME%\platform-tools\adb.exe"
 set "APK=%~dp0app\build\outputs\apk\debug\app-debug.apk"
 set "TGT=%~dp0adb-target.txt"
 set "PKG=com.xiaz.flowvault.debug"

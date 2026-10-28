@@ -1,8 +1,18 @@
 @echo off
 setlocal
-set "JAVA_HOME=D:\tools\jdk\jdk-17.0.20.1+1"
-set "GRADLE_USER_HOME=D:\tools\gradle-home"
-set "ANDROID_HOME=D:\tools\android-sdk"
+rem Toolchain: fv-local.cmd in this folder (gitignored) may set JAVA_HOME,
+rem GRADLE_USER_HOME and ANDROID_HOME first. The defaults below guess a standard
+rem install; override any of them when the guess is wrong.
+if exist "%~dp0fv-local.cmd" call "%~dp0fv-local.cmd"
+if not defined JAVA_HOME set "JAVA_HOME=%LOCALAPPDATA%\Programs\Android Studio\jbr"
+if not defined GRADLE_USER_HOME set "GRADLE_USER_HOME=%USERPROFILE%\.gradle"
+if not defined ANDROID_HOME if defined ANDROID_SDK_ROOT set "ANDROID_HOME=%ANDROID_SDK_ROOT%"
+if not defined ANDROID_HOME set "ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk"
+if not exist "%JAVA_HOME%\bin\java.exe" (
+    echo java=MISSING at "%JAVA_HOME%"
+    endlocal
+    exit /b 1
+)
 rem Double-clicking this file passes no arguments. Older version printed one usage
 rem line and exited, so the window closed before anything could be read and it looked
 rem like "the build downloaded nothing". Now no arguments = debug assemble + lint.

@@ -5,7 +5,9 @@
 代码最后一笔是 `c609fb6`，其后只动过文档。入库 81 只文件，其中 50 只 .kt / 6,757 行，12 张表 / 10 个索引，`src/test` 与 `src/androidTest` 都不存在（零只测试）。
 笔数和哈希是会变的读数，回来先 `git rev-list --count HEAD`、`git log --oneline -1` 现取，别照抄这一段。
 
-闸口读数：`BUILD SUCCESSFUL`，lint `0 errors, 2 warnings`。这两条是基线，改动之后必须回到这两个数。
+闸口读数：`BUILD SUCCESSFUL`，lint `0 errors, 3 warnings`。这三条是基线，改动之后必须回到这三个数。
+
+第三条（`AndroidGradlePluginVersion`，提示 Gradle 9.8.2 可用）是公开前那次改动才露出来的：wrapper 的发行版地址原来指向本地 `file:`，那个探测器只在 `http(s)` 地址上看，于是它一直不响。想消掉它得升到 9.8.2 并重下一次发行版，一个补丁版本，不值。
 
 ## 一、做了什么
 
@@ -84,7 +86,7 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 
 ### 这一版封了什么
 
-发布目录 `D:\XIAZ\Wiki\FlowVault-release-20261028\`（在仓库外，不入库）：debug APK、源码 zip、README、本文件，加一份 `SHA256SUMS.txt`。APK 不可字节复现，认包只认 SHA-256；文件字节数会因 zip 对齐补白来回摆几百 KB，别拿它当"变了多少"。
+发布目录在仓库外（不入库，具体位置见本机笔记）：debug APK、源码 zip、README、本文件，加一份 `SHA256SUMS.txt`。APK 不可字节复现，认包只认 SHA-256；文件字节数会因 zip 对齐补白来回摆几百 KB，别拿它当"变了多少"。
 
 源码包落下去之后逐只解压回环 `cmp` 过，81 只全对得上当时的工作树。以后重打这个包，这条要重跑一遍——改文档也算改内容。重打之前顺手确认一下没有 `.kt` 带着 CRLF 落在工作树里：`.gitattributes` 写的是 `* text=auto eol=lf`，git 会在提交时把 CR 吃掉，所以 `git status` 报干净而 `git archive` 出来的字节比工作树少一截 CR，只有逐只 cmp 能发现。
 
@@ -96,7 +98,7 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 - 扫的是 `HEAD` 整棵树，不是暂存表——提交之后 `--cached` 是空的，扫 0 只也照样会报"无"。必须把"扫了 N 只文件"打出来，N=0 是闸坏，不是干净。
 - 提交之前查暂存表逐只过一遍，提交之后再对 `HEAD` 过一遍；文档、注释、提交说明都算内容，说明性文字里别落针的字面，否则扫描咬自己。
 
-这一台留下的两件工具在仓库外：`D:\tools\avd\fvscan.py`（上面那套闸，脚本里没有身份字面，针从环境变量和 git 配置现取）、`D:\tools\avd\avd_boot.cmd`（起模拟器，`ANDROID_AVD_HOME` 写在脚本里，不落注册表）。这两个目录不清理，但如果哪天清了，按上面几条重写即可。
+这一台留下的两件工具也在仓库外、和模拟器数据放一起：一只 `fvscan.py`（上面那套闸，脚本里没有身份字面，针从环境变量和 git 配置现取）、一只 `avd_boot.cmd`（起模拟器，`ANDROID_AVD_HOME` 写在脚本里，不落注册表）。这两个不清理，但如果哪天清了，按上面几条重写即可。
 
 ## 六、写代码前必看的坑
 
@@ -107,11 +109,14 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 - 全库不出现 SQLite 3.24+ 语法（`upsert` / `RETURNING`），minSdk 26。
 - 备份恢复的回滚只认抛异常：androidx 的 `transaction { }` 在 API 30+ 是"块里返回 null 照样提交"，中途出问题一律 throw。
 
-## 七、公开之前要动的三处
+## 七、工具链路径怎么摆（入库前已改过一次）
 
-`build.cmd` 顶部三行、`deploy.cmd` 两行、`gradle/wrapper/gradle-wrapper.properties` 两行里写的是本机工具链位置（JDK、Gradle 缓存、SDK、以及一个指向本地 Gradle 发行版的 `file:` 地址）。它们不是身份凭据，但会暴露这台机器的目录布局，而且换一台机器就构建不动。发出去之前换成环境变量或者删掉，仓库里留一份能用的默认值。
+`build.cmd`、`deploy.cmd`、`gradle/wrapper/gradle-wrapper.properties` 原来写死了本机的 JDK／Gradle 缓存／SDK／本地发行版地址，既暴露目录布局，换台机器也构建不动。现在：
 
-`.gitignore` 里已经排掉了 `local.properties`、`adb-target.txt`（无线调试地址只落这一只文件，从不入库）。
+- 两个脚本先 `call` 同目录的 `fv-local.cmd`（已在 `.gitignore` 里，不入库），再用环境变量或标准默认值兜底（`ANDROID_HOME` 或 `ANDROID_SDK_ROOT`、`%LOCALAPPDATA%\Android\Sdk`、`%USERPROFILE%\.gradle`、Android Studio 自带 JBR）。本机的三行放在 `fv-local.cmd` 里，内容就是三个 `set`。
+- wrapper 的 `distributionUrl` 是官方 https 地址。本机不想重下 144 MB，可以把已解压的发行版放到 `$GRADLE_USER_HOME/wrapper/dists/gradle-9.8.1-bin/<hash>/` 下——`<hash>` 是**发行版 URL 的 MD5 转 36 进制**（`file:/` 地址和 `https://` 地址算出来是两个目录），外加一个空的 `<名字>.zip.ok` 标记文件。这件事已经做过，所以本机构建不会再下载。
+
+`.gitignore` 里排掉了 `local.properties`、`adb-target.txt`（无线调试地址只落这一只文件，从不入库）、`fv-local.cmd`。
 
 ## 八、还能做什么（按性价比排）
 
