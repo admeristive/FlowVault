@@ -4,6 +4,16 @@
 
 全离线。不申请任何系统权限，不联网，没有账号，没有后端。数据只在他自己手机的应用目录里，卸载即干净。
 
+## 下载
+
+[Releases](https://github.com/admeristive/FlowVault/releases) 里有 `v0.1.0` 的 debug APK：
+
+```
+adb install -r -t FlowVault-0.1.0-debug.apk
+```
+
+debug 签名，只适合自己装。API 26 及以上。
+
 ## 三态
 
 切到哪一态，整屏换一个主色，标题下面那位看板娘换一个姿势。
@@ -44,8 +54,16 @@ build.cmd                      # 无参数＝assembleDebug + lintDebug
 build.cmd :app:assembleDebug   # 只出包
 ```
 
-`build.cmd` 顶部三行写死了本机 JDK、Gradle 缓存、Android SDK 的位置，换机器改那三行。
-`gradle/wrapper/gradle-wrapper.properties` 第 5 行指向本机已有的 Gradle 发行版（省一次 144 MB 下载），清理掉那个下载缓存后改回第 4 行注释里的官方地址。
+`build.cmd` 和 `deploy.cmd` 不写死工具链位置：先读同目录的 `fv-local.cmd`（在 `.gitignore` 里，不入库），再用环境变量和标准默认值兜底。换台机器要么把 JDK／SDK 装在默认位置，要么自己建一份 `fv-local.cmd`，三行就够：
+
+```
+@echo off
+set "JAVA_HOME=<JDK 17 的目录>"
+set "GRADLE_USER_HOME=<Gradle 缓存目录>"
+set "ANDROID_HOME=<Android SDK 目录>"
+```
+
+`gradle/wrapper/gradle-wrapper.properties` 指向官方发行版。本机想复用已下好的，改那一行的地址即可（只影响本机）。
 
 工具链：JDK 17、AGP 9.4.1（内建 Kotlin 2.2.10）、Gradle 9.8.1、Compose BOM 2026.09.00。
 `compileSdk 37` + `compileSdkMinor 2`（稳定渠道没有裸 android-37），`minSdk 26`，`targetSdk 36`。

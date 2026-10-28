@@ -90,6 +90,12 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 
 源码包落下去之后逐只解压回环 `cmp` 过，81 只全对得上当时的工作树。以后重打这个包，这条要重跑一遍——改文档也算改内容。重打之前顺手确认一下没有 `.kt` 带着 CRLF 落在工作树里：`.gitattributes` 写的是 `* text=auto eol=lf`，git 会在提交时把 CR 吃掉，所以 `git status` 报干净而 `git archive` 出来的字节比工作树少一截 CR，只有逐只 cmp 能发现。
 
+### 已经公开的地方
+
+仓库：<https://github.com/admeristive/FlowVault>。tag `v0.1.0` 打在发布那一刻（`git rev-parse v0.1.0` 现取），Release 上挂了 APK、源码 zip、`SHA256SUMS.txt` 三只。上传后按 GitHub 返回的每个资产的 digest 核过，三只与本地同串；那只 APK 就是模拟器上跑过的那一份。
+
+发版之后仓库又添了几笔文档提交，所以 Release 里的源码 zip 停在 tag 那一刻，不等于当前 HEAD。以后要发新版本：`build.cmd` 出包 → 重打 zip → 更新 `SHA256SUMS.txt` → `gh release create`（这台机器上 `gh` 已按用户级装好并登录过）。
+
 ### 隐私闸怎么重跑（脚本是一次性的，按这几条重写）
 
 - 针不硬编：账户名、邮箱那类身份字面在运行时从 `git config user.email`、远程 ref 现取，不写进脚本源码。
