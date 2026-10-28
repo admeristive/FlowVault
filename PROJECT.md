@@ -2,7 +2,8 @@
 
 这份文件只管一件事：下次回来（可能就是几周后的我自己），怎么不重新摸一遍就能接上。
 
-代码停在 `b6375c3`，共 10 笔提交，81 只入库文件。其中 50 只 .kt / 6,757 行，12 张表 / 10 个索引，`src/test` 与 `src/androidTest` 都不存在（零只测试）。
+代码最后一笔是 `c609fb6`，其后只动过文档。入库 81 只文件，其中 50 只 .kt / 6,757 行，12 张表 / 10 个索引，`src/test` 与 `src/androidTest` 都不存在（零只测试）。
+笔数和哈希是会变的读数，回来先 `git rev-list --count HEAD`、`git log --oneline -1` 现取，别照抄这一段。
 
 闸口读数：`BUILD SUCCESSFUL`，lint `0 errors, 2 warnings`。这两条是基线，改动之后必须回到这两个数。
 
@@ -29,6 +30,8 @@
 | `7284875` | 删 9 个只写不读的符号；摘掉预览工具链依赖；备份规则按系统版本写全；图标目录去掉多余的 v26 后缀；三处过期注释 |
 | `c609fb6` | 恢复那颗按钮在计时时当场挡下，不再等他挑完文件才拒绝 |
 | `b6375c3` | 补 README 与这份重序文档 |
+
+`b6375c3` 之后还有几笔，全是这份文档自己的修订，不逐条列。
 
 `7284875` 删掉的九个：`TodoDao.add`、`TodoDao.delete`、`LedgerDao.add`、`LedgerDao.delete`、`LedgerDao.sumByDay`、`LedgerDao.listCategories`、`LedgerCategory`、`NovelSource.sizeOf`、`PendingNote`。
 它们全是"接口留着、没人调"——写路径统一走 `insertIn`（胶囊要和它生成的那一行同笔提交），所以外面那层壳是空的。删之前确认过 `TimelineWriter.ACTION_DELETE` 不会变孤儿：`FlashDao` 和 `NovelDao` 还在用它。
@@ -63,6 +66,7 @@
 - 计时中点"选一份来恢复"：拒绝那句当场出现，文件选择器没弹出来。
 - **备份整条回路走通**：导出 2,246 个字符 → 选回来 → "要装回来 9 行 / 现在库里的 9 行会一起没了" → 确认 → "装回来 9 行，分布在 6 张表"，屏上数据一条没少，`操作失败` 零次，崩溃零次。
 - 启动图标在应用抽屉里正常渲染（去掉 v26 后缀之后重验过）。
+- 封版这只 APK（SHA 前缀 `f5e709c9`）在模拟器上装成、跑起，三态各点一次：前台停在 `MainActivity`，`E AndroidRuntime` 零条，crash 缓冲区零条。装完又按设备的包抽回本地比过哈希，与构建产物一字不差——发出去的就是跑过的那只。
 
 **只有真机能验** —— 荣耀上"点一下碎成一片雪花"那个渲染毛病。这一版所有点击都是自绘、`indication = null`，禁用清单（`ripple` / `AnimatedVisibility` / `AnimatedContent` / `graphicsLayer` / `.scale(` / 无 interactionSource 的 `clickable`）在源码里命中 0 次，但那条毛病模拟器不复现，最终还是要真机点头。
 
@@ -80,7 +84,7 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 
 ### 这一版封了什么
 
-发布目录四只文件加一份 `SHA256SUMS.txt`：debug APK、源码包 `git archive HEAD` 打的 zip、README、本文件。APK 不可字节复现，认包只认 SHA-256；文件字节数会因 zip 对齐补白来回摆几百 KB，别拿它当"变了多少"。
+发布目录 `D:\XIAZ\Wiki\FlowVault-release-20261028\`（在仓库外，不入库）：debug APK、源码 zip、README、本文件，加一份 `SHA256SUMS.txt`。APK 不可字节复现，认包只认 SHA-256；文件字节数会因 zip 对齐补白来回摆几百 KB，别拿它当"变了多少"。
 
 源码包落下去之后逐只解压回环 `cmp` 过，81 只全对得上当时的工作树。以后重打这个包，这条要重跑一遍——改文档也算改内容。重打之前顺手确认一下没有 `.kt` 带着 CRLF 落在工作树里：`.gitattributes` 写的是 `* text=auto eol=lf`，git 会在提交时把 CR 吃掉，所以 `git status` 报干净而 `git archive` 出来的字节比工作树少一截 CR，只有逐只 cmp 能发现。
 
@@ -91,6 +95,8 @@ build.cmd                        # 无参数＝assembleDebug + lintDebug
 - 每轮必带一只正对照和一只负对照：正对照拿已知一定存在的串（来源要跟针同源，不能是脑补的），负对照拿一份干净样本要求放行。少了负对照，"零命中"可能是闸坏了；正对照复用同一个错表达式会连自证一起假。
 - 扫的是 `HEAD` 整棵树，不是暂存表——提交之后 `--cached` 是空的，扫 0 只也照样会报"无"。必须把"扫了 N 只文件"打出来，N=0 是闸坏，不是干净。
 - 提交之前查暂存表逐只过一遍，提交之后再对 `HEAD` 过一遍；文档、注释、提交说明都算内容，说明性文字里别落针的字面，否则扫描咬自己。
+
+这一台留下的两件工具在仓库外：`D:\tools\avd\fvscan.py`（上面那套闸，脚本里没有身份字面，针从环境变量和 git 配置现取）、`D:\tools\avd\avd_boot.cmd`（起模拟器，`ANDROID_AVD_HOME` 写在脚本里，不落注册表）。这两个目录不清理，但如果哪天清了，按上面几条重写即可。
 
 ## 六、写代码前必看的坑
 
