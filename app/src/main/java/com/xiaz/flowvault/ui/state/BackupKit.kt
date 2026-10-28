@@ -100,8 +100,18 @@ internal class BackupKit(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** 第一步：读回来、验一遍。验过了才把两组数亮出来，等第二下。 */
-    fun stage(uri: Uri) {
+    /**
+     * 第一步：读回来、验一遍。验过了才把两组数亮出来，等第二下。
+     *
+     * [timingActive] 由界面当场报"现在有没有一趟在走"。恢复会把 `pomodoro_sessions` 整张洗掉，
+     * 那一趟对应的行就没了：它接着走、走满再写回，写的是一行已经不存在的记录，等于白走一趟。
+     * 与其替他收掉那趟（他可能正走到 22 分钟），不如在这里停住，让他自己决定停下还是走完。
+     */
+    fun stage(uri: Uri, timingActive: Boolean) {
+        if (timingActive) {
+            _state.value = _state.value.copy(plan = null, note = TIMING_REFUSED)
+            return
+        }
         _state.value = _state.value.copy(busyLabel = "在读那份文件", note = null, plan = null)
         viewModelScope.launch(Dispatchers.IO) {
             val raw = files.read(uri)
@@ -126,8 +136,13 @@ internal class BackupKit(app: Application) : AndroidViewModel(app) {
      * 第二步：真写。整表替换在一个事务里，中途挂了就是原样。
      * [onDone] 只在写成的时候于主线程跑一次——屏幕那边要拿它去让三个持有者重读。
      */
-    fun confirmRestore(onDone: () -> Unit) {
+    fun confirmRestore(onDone: () -> Unit, timingActive: Boolean) {
         val plan = _state.value.plan ?: return
+        if (timingActive) {
+            // 验和按第二下之间可以隔很久，那一趟也可能是在那之间才开起来的。
+            _state.value = _state.value.copy(plan = null, note = TIMING_REFUSED)
+            return
+        }
         // 先把 plan 摘掉再动手：这样第二下连点两次也只会走一次。
         _state.value = _state.value.copy(busyLabel = "正在整表替换", note = null, plan = null)
         viewModelScope.launch(Dispatchers.IO) {
@@ -216,4 +231,9 @@ internal class BackupKit(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch(Dispatchers.Main.immediate) {
             _state.value = transform(_state.value)
         }
+
+    private companion object {
+        /** 界面原样显示的一句，不在这句话里掺"事务""表名"这类底层话。 */
+        const val TIMING_REFUSED = "正在走一趟，先把它停下或走完再来恢复"
+    }
 }

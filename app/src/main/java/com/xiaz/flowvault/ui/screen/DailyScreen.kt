@@ -151,9 +151,9 @@ internal fun DailyScreen(
                     }
                 },
                 {
-                    BackupCard(backupState, backup) {
+                    BackupCard(backupState, backup, timingActive = { clock.timing.value != null }) {
                         // 库是整个换过的：三个持有者各拿各的读数，谁也不知道对方那边已经变了，一律重读。
-                        // 计时器更要当场收掉——它那一趟对应的行可能已经不在新库里，让它接着走就是在骗他。
+                        // 计时器这一下是补那一线缝的：闸是在主线程上的，验过到写库之间万一有人开了一趟。
                         clock.stop()
                         board.refresh()
                         decks.refresh()
@@ -213,12 +213,17 @@ private val TABLE_NAMES = mapOf(
 
 /** 备份与恢复：导出＝另存一个文件，恢复＝读回来先验一遍，再由他按第二下。 */
 @Composable
-private fun BackupCard(state: BackupState, kit: BackupKit, onRestored: () -> Unit) {
+private fun BackupCard(
+    state: BackupState,
+    kit: BackupKit,
+    timingActive: () -> Boolean,
+    onRestored: () -> Unit,
+) {
     val exporter = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
     ) { uri -> if (uri != null) kit.export(uri) }
     val restorer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) kit.stage(uri)
+        if (uri != null) kit.stage(uri, timingActive())
     }
     // 指认来源文件走的是书和卡组那两类文件，跟备份文件不是一回事，所以另开一个选择器。
     val reauthPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -255,10 +260,10 @@ private fun BackupCard(state: BackupState, kit: BackupKit, onRestored: () -> Uni
                 Caption(shapeOf(plan.before))
             }
             Spacer(Modifier.height(8.dp))
-            Caption("按下去正在走的那趟会当场收掉；小说和卡组的来源文件恢复后要重新指认")
+            Caption("正在走一趟的时候不许恢复：小说和卡组的来源文件恢复后要重新指认")
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ActionLabel("确认整表替换") { kit.confirmRestore(onRestored) }
+                ActionLabel("确认整表替换") { kit.confirmRestore(onRestored, timingActive()) }
                 ActionLabel("算了") { kit.discardPlan() }
             }
         }

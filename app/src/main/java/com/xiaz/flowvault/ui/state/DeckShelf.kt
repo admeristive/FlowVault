@@ -227,10 +227,13 @@ internal class DeckShelf(app: Application) : AndroidViewModel(app) {
             val passed = attempt?.passed == true
             val now = System.currentTimeMillis()
             val counts = dao.tollOfDay(DayKey.of(now))
+            // 这两读数留在 IO 线程上取：换到 Main 之后再查库，就是把一次磁盘读塞进画帧里。
+            val freshDecks = dao.listDecks(now)
+            val freshDue = dao.countDue(now)
             withContext(Dispatchers.Main.immediate) {
                 _state.value = _state.value.copy(
-                    decks = dao.listDecks(now),
-                    dueCount = dao.countDue(now),
+                    decks = freshDecks,
+                    dueCount = freshDue,
                     tollAsked = counts.first,
                     tollPassed = counts.second,
                     toll = toll.copy(
