@@ -1,6 +1,6 @@
 package com.xiaz.flowvault.core.state
 
-/** 顶层运行态。三态互斥，手动切换；番茄钟到点的自动触发在阶段 3 接进来。 */
+/** 顶层运行态。三态互斥：手动切走 ModeEngine.enter，攻坚走满之后由番茄钟把下一态交给回血。 */
 enum class GlobalMode(val label: String, val hint: String) {
     FOCUS("攻坚", "只做眼前这段时间该做的事"),
     BREAK("回血", "读一会儿，到点自己收"),

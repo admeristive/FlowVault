@@ -149,14 +149,3 @@ private fun ColumnScope.Stacked(cards: List<@Composable () -> Unit>, gap: Dp) {
  */
 internal fun headCount(count: Int, word: String): String =
     if (count <= 0) "" else " · $count $word"
-
-/** 尚未接入的能力一律写清在第几阶段落地，界面里不留假数据。 */
-@Composable
-internal fun PendingNote(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 8.dp),
-    )
-}

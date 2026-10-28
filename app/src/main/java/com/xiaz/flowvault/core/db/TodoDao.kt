@@ -13,20 +13,6 @@ import com.xiaz.flowvault.core.model.Todo
  */
 internal class TodoDao(private val db: Lazy<SQLiteDatabase>) {
 
-    fun add(
-        title: String,
-        note: String?,
-        priority: Int,
-        dayKey: String,
-        startMin: Int?,
-        endMin: Int?,
-        plannedPomos: Int,
-    ): Long? = guarding("todo") {
-        db.value.transaction {
-            insertIn(this, title, note, priority, dayKey, startMin, endMin, plannedPomos)
-        }
-    }
-
     /** 见 LedgerDao.insertIn 的同名理由：胶囊要和它生成的那条待办一起提交。 */
     internal fun insertIn(
         tr: SQLiteDatabase,
@@ -86,16 +72,6 @@ internal class TodoDao(private val db: Lazy<SQLiteDatabase>) {
             val changed = update("todos", values, "id = ?", arrayOf(id.toString()))
             if (changed > 0) {
                 TimelineWriter.append(this, TimelineWriter.MODULE_TODO, action, "todos", id, null)
-            }
-            changed > 0
-        }
-    } ?: false
-
-    fun delete(id: Long): Boolean = guarding("todo") {
-        db.value.transaction {
-            val changed = delete("todos", "id = ?", arrayOf(id.toString()))
-            if (changed > 0) {
-                TimelineWriter.append(this, TimelineWriter.MODULE_TODO, TimelineWriter.ACTION_DELETE, "todos", id, null)
             }
             changed > 0
         }

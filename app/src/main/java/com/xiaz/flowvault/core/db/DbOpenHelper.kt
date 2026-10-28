@@ -35,7 +35,7 @@ internal class DbOpenHelper(
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        DebugLog.warn(TAG, "数据库升级 $oldVersion -> $newVersion（阶段 2 起补迁移脚本）")
+        DebugLog.warn(TAG, "数据库升级 $oldVersion -> $newVersion，逐版本走 Migrations")
         Migrations.upgrade(db, oldVersion, newVersion)
     }
 

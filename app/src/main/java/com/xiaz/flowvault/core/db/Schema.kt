@@ -1,7 +1,7 @@
 package com.xiaz.flowvault.core.db
 
 /**
- * 表结构唯一定义处。列语义见阶段 0 蓝图：
+ * 表结构唯一定义处。三条列口径全库统一：
  * 时间戳一律 UTC epoch 毫秒，日分组一律本地 day_key('yyyy-MM-dd')，金额一律带符号「分」。
  */
 internal object Schema {

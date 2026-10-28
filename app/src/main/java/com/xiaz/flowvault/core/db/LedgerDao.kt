@@ -3,9 +3,7 @@ package com.xiaz.flowvault.core.db
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import androidx.core.database.sqlite.transaction
 import com.xiaz.flowvault.core.debug.guarding
-import com.xiaz.flowvault.core.model.LedgerCategory
 import com.xiaz.flowvault.core.model.LedgerTx
 import com.xiaz.flowvault.core.util.DayKey
 
@@ -15,11 +13,6 @@ import com.xiaz.flowvault.core.util.DayKey
  * 全文件不出现 upsert / RETURNING 这类 SQLite 3.24+ 语法（本库 minSdk 26）。
  */
 internal class LedgerDao(private val db: Lazy<SQLiteDatabase>) {
-
-    fun add(amountCents: Long, categoryName: String?, note: String?, occurredAt: Long): Long? =
-        guarding("ledger") {
-            db.value.transaction { insertIn(this, amountCents, categoryName, note, occurredAt) }
-        }
 
     /**
      * 单独拆出来是给胶囊路由用的：captures 行和这笔流水必须在**同一个事务**里落，
@@ -61,44 +54,7 @@ internal class LedgerDao(private val db: Lazy<SQLiteDatabase>) {
             ).use { c -> if (!c.moveToFirst()) emptyList() else iterate(c) }
         } ?: emptyList()
 
-    fun sumByDay(dayKey: String): Long = total("day_key = ?", arrayOf(dayKey))
-
     fun sumByMonth(monthKey: String): Long = total("day_key LIKE ?", arrayOf(DayKey.monthPrefix(monthKey)))
-
-    fun delete(id: Long): Boolean = guarding("ledger") {
-        db.value.transaction {
-            val changed = delete("ledger_tx", "id = ?", arrayOf(id.toString()))
-            if (changed > 0) {
-                TimelineWriter.append(
-                    this,
-                    TimelineWriter.MODULE_LEDGER,
-                    TimelineWriter.ACTION_DELETE,
-                    "ledger_tx",
-                    id,
-                    null,
-                )
-            }
-            changed > 0
-        }
-    } ?: false
-
-    fun listCategories(): List<LedgerCategory> =
-        guarding("ledger") {
-            db.value.rawQuery(
-                "SELECT id, name, sort FROM ledger_categories ORDER BY sort, name",
-                null,
-            ).use { c ->
-                if (!c.moveToFirst()) {
-                    emptyList()
-                } else {
-                    val out = ArrayList<LedgerCategory>(c.count)
-                    do {
-                        out.add(LedgerCategory(c.getLong(0), c.getString(1), c.getInt(2)))
-                    } while (c.moveToNext())
-                    out
-                }
-            }
-        } ?: emptyList()
 
     private fun total(where: String, args: Array<String>): Long =
         guarding("ledger") {

@@ -3,10 +3,14 @@
 
     <!-- 全离线设计：本文件不声明任何系统权限，文件读写一律走 SAF 持久化授权。
          合并清单里会出现一条 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION，那是 AndroidX
-         自动注入的应用内自用权限，不向系统索取任何东西。 -->
+         自动注入的应用内自用权限，不向系统索取任何东西。
+         allowBackup、fullBackupContent 管 8～11，dataExtractionRules 从 12 起才是真值，
+         两段都得写全。这份库不进任何系统备份，导出只走应用内那一条路。 -->
     <application
         android:name=".FlowVaultApp"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_content"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

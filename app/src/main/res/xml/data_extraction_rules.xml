@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 起，系统读这份规则而不是 android:allowBackup / android:fullBackupContent；
+  8～11 那一段由 xml/backup_content.xml 管，两份是同一个意图。
+  每一个域都排干净，一行数据都不给云备份和换机传输——这个应用导出走 SAF，
+  数据只有一份，就是他手机里那份；系统悄悄备份出来的副本他看不见也删不掉。
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+    </device-transfer>
+</data-extraction-rules>

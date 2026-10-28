@@ -74,11 +74,6 @@ internal class NovelSource(private val context: Context) {
             ?: fallbackName(uri)
     } ?: fallbackName(uri)
 
-    fun sizeOf(uri: Uri): Long? = guarding("novel") {
-        context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
-            ?.use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null }
-    }
-
     private fun fallbackName(uri: Uri): String =
         uri.lastPathSegment?.substringAfterLast('/') ?: "未命名.txt"
 
